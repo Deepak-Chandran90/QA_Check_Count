@@ -1,0 +1,972 @@
+USE [eddiextraction]
+GO
+/****** Object:  StoredProcedure [dbo].[QA_venue]    Script Date: 11/28/2024 12:18:17 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+ALTER PROCEDURE [dbo].[QA_venue] @Table nvarchar(max)
+AS
+BEGIN
+SET NOCOUNT ON;
+declare @sql nvarchar(max)
+declare @sql1 nvarchar(max)
+declare @sql2 nvarchar(max)
+declare @sql3 nvarchar(max)
+declare @sql4 nvarchar(max)
+declare @sql5 nvarchar(max)
+
+select @sql='select count(distinct venueid) as count,
+case 
+        when count(distinct venueid) >= 1 then ''Venue Diacritics''
+        else  ''no issue''
+end as status
+from '+@Table+' where patindex(''%[^ !-~()]%'' COLLATE Latin1_General_BIN,venue) >0
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid) >= 1 then ''Address Diacritics''
+        else  ''no issue''
+end as status
+from '+@Table+'  where patindex(''%[^ !-~()]%'' COLLATE Latin1_General_BIN,address) >0
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid) >= 1 then ''City Diacritics''
+        else  ''no issue''
+end as status
+from '+@Table+'  where patindex(''%[^ !-~()]%'' COLLATE Latin1_General_BIN,city) >0
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid) >= 1 then ''State Diacritics''
+        else  ''no issue''
+end as status
+from '+@Table+'  where patindex(''%[^ !-~()]%'' COLLATE Latin1_General_BIN,state) >0
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid) >= 1 then ''Zip Diacritics''
+        else  ''no issue''
+end as status
+from '+@Table+'  where patindex(''%[^ !-~()]%'' COLLATE Latin1_General_BIN,zip) >0 
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid) >= 1 then ''Country Diacritics''
+        else  ''no issue''
+end as status
+from '+@Table+'  where patindex(''%[^ !-~()]%'' COLLATE Latin1_General_BIN,country) >0
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid) >= 1 then ''VCapacity Diacrtics''
+        else  ''no issue''
+end as status
+from '+@Table+'  where patindex(''%[^ !-~()]%'' COLLATE Latin1_General_BIN,vcapacity) >0 
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue _ ?''
+        else  ''no issue''
+end as status
+from '+@Table+'  where Venue like ''%?%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address_?''
+        else  ''no issue''
+end as status
+from '+@Table+'  where Address like ''%?%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City_?''
+        else  ''no issue''
+end as status
+from '+@Table+'  where city like ''%?%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State_?''
+        else  ''no issue''
+end as status
+from '+@Table+'  where state like ''%?%''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip_?''
+        else  ''no issue''
+end as status
+from '+@Table+'  where zip like ''%?%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country_?''
+        else  ''no issue''
+end as status
+from '+@Table+'  where country like ''%?%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''venue=city''
+        else  ''no issue''
+end as status
+from '+@Table+'  where City = Venue
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City Null''
+        else  ''no issue''
+end as status
+from '+@Table+' where isnull(city,'''')='''' and isnull(venue,'''')!=''''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City St''
+        else  ''no issue''
+end as status
+from '+@Table+' where city like ''st %'''
+
+
+
+--print @SQL
+
+select @sql1='select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City st dot''
+        else  ''no issue''
+end as status
+from '+@Table+' where city like ''st.%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City Mt''
+        else  ''no issue''
+end as status
+from '+@Table+'   where city like ''mt %''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City Mt dot''
+        else  ''no issue''
+end as status
+from '+@Table+'   where city like ''mt.%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City In Lowercase''
+        else  ''no issue''
+end as status
+from '+@Table+'   where City = lower(City) collate SQL_Latin1_General_CP1_CS_AS and City!=''''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City In Uppercase''
+        else  ''no issue''
+end as status
+from '+@Table+'   where City = upper(City) collate SQL_Latin1_General_CP1_CS_AS and City!=''''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City Comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  where city like ''%,%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''city like u00''
+        else  ''no issue''
+end as status
+from '+@Table+'  where city like ''%u00%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then '' city like dot''
+        else  ''no issue''
+end as status
+from '+@Table+'  where city like ''%.%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''city like double single quotes''
+        else  ''no issue''
+end as status
+from '+@Table+'  where city like ''%''''''''%''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''city double space''
+        else  ''no issue''
+end as status
+from '+@Table+'  where city like ''%  %''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State in Comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  where State like ''%,%''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State less than 4''
+        else  ''no issue''
+end as status
+from '+@Table+'  where len(State)<4
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State In Lowercase''
+        else  ''no issue''
+end as status
+from '+@Table+'  where state COLLATE Latin1_General_CS_AI = Lower(state)
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State In Uppercase''
+        else  ''no issue''
+end as status
+from '+@Table+'  where state = upper(state) collate SQL_Latin1_General_CP1_CS_AS and state!=''''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State like u00''
+        else  ''no issue''
+end as status
+from '+@Table+'  where State like ''%u00%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then '' state like dot''
+        else  ''no issue''
+end as status
+from '+@Table+'  where state like ''%.%'' '
+
+--print @SQL1
+
+select @sql2='select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State double space''
+        else  ''no issue''
+end as status
+from '+@Table+'  where State like ''%  %''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State double single quotes''
+        else  ''no issue''
+end as status
+from '+@Table+'  where State like ''%''''''''%''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State single quotes''
+        else  ''no issue''
+end as status
+from '+@Table+'  where State like ''%''''%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''state=[NULL]''
+        else  ''no issue''
+end as status
+from '+@Table+'  where state=''[NULL]''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country=state''
+        else  ''no issue''
+end as status
+from '+@Table+'  where country = state 
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country=city''
+        else  ''no issue''
+end as status
+from '+@Table+'  where country = city and city not in (''Singapore'', ''Luxembourg'')
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country less than 4''
+        else  ''no issue''
+end as status
+from '+@Table+'  where len(Country)<4
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country Uppercase''
+        else  ''no issue''
+end as status
+from '+@Table+'  where country = upper(country) collate SQL_Latin1_General_CP1_CS_AS and country!=''''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country Lowercase''
+        else  ''no issue''
+end as status
+from '+@Table+'  where country = lower(country) collate SQL_Latin1_General_CP1_CS_AS and country!=''''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country null''
+        else  ''no issue''
+end as status
+from '+@Table+'  where country is null
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Lat_long Length greater than 13''
+        else  ''no issue''
+end as status
+from '+@Table+'   where len(Latitude)>13
+or len(Longitude)>13
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Lat_long Length less than 6''
+        else  ''no issue''
+end as status
+from '+@Table+'  where len(Latitude)<6
+or len(Longitude)<6
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip Null''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where isnull (zip,'''')='''' and isnull(venue,'''')!='''' and UP_live is null
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Capacity between 1 to 49''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where capacity between 1 and 49
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Multiple Vcategory''
+        else  ''no issue''
+end as status
+from '+@Table+' 
+group by venueid having count(distinct VCategory) > 1
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue less than 3''
+        else  ''no issue''
+end as status
+from '+@Table+'  where len(venue)<3'
+
+--print @SQL2
+
+select @sql3='select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address less than 5''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where len(Address)<5
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City less than 3''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where len(City)<3
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State less than 3''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where len(state)<3
+
+union all
+
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country less than 4''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where len(Country)<4
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip greater than 9''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where len(zip)>9
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip less than 3''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where len(zip)<3
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like unknown''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%unknown%''
+
+union all 
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like Unnamed''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%Unnamed%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like TBD''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%TBD%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like TBA''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%TBA %''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like Online''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%Online%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like To be''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%To be%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like Anywhere''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%Anywhere%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like TBC''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%TBC%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like Virtual''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%Virtual%'' 
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address like Unnamed''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%Unnamed%'''
+
+--print @SQL3
+
+select @sql4='select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address like TBD''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%TBD%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address like TBA''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%TBA %''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address like Online''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%Online%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''address like To be''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%To be%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then '' Address like Anywhere''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%Anywhere%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address like TBC''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%TBC%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address like Virtual''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%Virtual%'' 
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Lat_Long Null''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where (latitude is null or longitude is null) 
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue like pre comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like '',%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue single quotes''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''''''%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address pre comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Address like '',%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City pre comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where City like '',%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State pre comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where State like '',%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip pre comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Zip like '',%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue post comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where venue like ''%,''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address post comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%,'' 
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City post comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where City like ''%,'' '   
+
+--print @SQL4
+
+select @sql5='select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State post comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where state like ''%,''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip post comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where zip like ''%,''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue double comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Address like ''%,,%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address double comma''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Address like ''%,,%''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address double space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Address like ''%  %''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue post space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Venue like ''% ''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address post space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Address like ''% ''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City post space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where City like ''% ''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State post space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where State like ''% ''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country post space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Country like ''% ''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip post space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Zip like ''% ''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Venue pre space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Venue like '' %''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Address pre space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where Address like '' %''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''City pre space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where City like '' %''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''State pre space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where state like '' %''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip pre space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where zip like '' %''
+
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Country pre space''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where country like '' %''
+
+union all
+
+select count(distinct venueid) as count,
+case 
+        when count(distinct venueid)>=1 then ''Zip in address''
+        else  ''no issue''
+end as status
+from '+@Table+'  
+where address like ''%''+SUBSTRING(zip,0,20) +''%'' and UP_Live is null'
+
+
+EXEC  (@SQL + ' union all ' + @SQL1 + ' union all ' + @SQL2 + 'union all ' + @SQL3 + ' union all ' + @SQL4 + ' union all ' + @SQL5)
+
+END
